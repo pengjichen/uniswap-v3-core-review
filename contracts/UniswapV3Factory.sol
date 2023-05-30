@@ -23,11 +23,13 @@ contract UniswapV3Factory is IUniswapV3Factory, UniswapV3PoolDeployer, NoDelegat
         owner = msg.sender;
         emit OwnerChanged(address(0), msg.sender);
 
-        feeAmountTickSpacing[500] = 10;
+        // 初始化手续费 三种
+        // 链上还有一个百一的, 可通过set方法设置, 用于稳定币的交易对
+        feeAmountTickSpacing[500] = 10;     // 万五
         emit FeeAmountEnabled(500, 10);
-        feeAmountTickSpacing[3000] = 60;
+        feeAmountTickSpacing[3000] = 60;    // 千三
         emit FeeAmountEnabled(3000, 60);
-        feeAmountTickSpacing[10000] = 200;
+        feeAmountTickSpacing[10000] = 200;  // 百一
         emit FeeAmountEnabled(10000, 200);
     }
 
@@ -38,12 +40,20 @@ contract UniswapV3Factory is IUniswapV3Factory, UniswapV3PoolDeployer, NoDelegat
         uint24 fee
     ) external override noDelegateCall returns (address pool) {
         require(tokenA != tokenB);
+
+        // 地址排序
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0));
+
+        // 获取tick间隔和手续费
         int24 tickSpacing = feeAmountTickSpacing[fee];
         require(tickSpacing != 0);
         require(getPool[token0][token1][fee] == address(0));
+
+        // UniswapV3PoolDeployer.deploy()
         pool = deploy(address(this), token0, token1, fee, tickSpacing);
+
+        // 双向记录手续费和pool地址关系
         getPool[token0][token1][fee] = pool;
         // populate mapping in the reverse direction, deliberate choice to avoid the cost of comparing addresses
         getPool[token1][token0][fee] = pool;

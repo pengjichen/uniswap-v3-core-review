@@ -142,6 +142,10 @@ library SqrtPriceMath {
                 : getNextSqrtPriceFromAmount0RoundingUp(sqrtPX96, liquidity, amountOut, false);
     }
 
+    // 计算流动性对应的token0
+    // 从getAmount0Delta()调用
+    // x = delta(1/根号P) * L = ( 1/根号(Plower) - 1/根号P(upper) ) * L
+    // liquidity * (sqrt(upper) - sqrt(lower)) / (sqrt(upper) * sqrt(lower)) 是通分之后的形式
     /// @notice Gets the amount0 delta between two prices
     /// @dev Calculates liquidity / sqrt(lower) - liquidity / sqrt(upper),
     /// i.e. liquidity * (sqrt(upper) - sqrt(lower)) / (sqrt(upper) * sqrt(lower))
@@ -154,7 +158,7 @@ library SqrtPriceMath {
         uint160 sqrtRatioAX96,
         uint160 sqrtRatioBX96,
         uint128 liquidity,
-        bool roundUp
+        bool roundUp // 添加流动性时向上取整, 移除流动性时不向上取整
     ) internal pure returns (uint256 amount0) {
         if (sqrtRatioAX96 > sqrtRatioBX96) (sqrtRatioAX96, sqrtRatioBX96) = (sqrtRatioBX96, sqrtRatioAX96);
 
@@ -163,6 +167,8 @@ library SqrtPriceMath {
 
         require(sqrtRatioAX96 > 0);
 
+        // 计算流动性对应的token0
+        // amount = l * (sqrtP1 - sqrtP2)
         return
             roundUp
                 ? UnsafeMath.divRoundingUp(
@@ -172,6 +178,8 @@ library SqrtPriceMath {
                 : FullMath.mulDiv(numerator1, numerator2, sqrtRatioBX96) / sqrtRatioAX96;
     }
 
+    // 计算 token1
+    // y = L * delta根号P = liquidity * (sqrt(upper) - sqrt(lower))
     /// @notice Gets the amount1 delta between two prices
     /// @dev Calculates liquidity * (sqrt(upper) - sqrt(lower))
     /// @param sqrtRatioAX96 A sqrt price
@@ -193,6 +201,8 @@ library SqrtPriceMath {
                 : FullMath.mulDiv(liquidity, sqrtRatioBX96 - sqrtRatioAX96, FixedPoint96.Q96);
     }
 
+    // 计算流动性对应的token0
+    // 从pool._modifyPosition()调用
     /// @notice Helper that gets signed token0 delta
     /// @param sqrtRatioAX96 A sqrt price
     /// @param sqrtRatioBX96 Another sqrt price
@@ -204,6 +214,7 @@ library SqrtPriceMath {
         int128 liquidity
     ) internal pure returns (int256 amount0) {
         return
+            // 分为移除流动性和添加流动性两种情况
             liquidity < 0
                 ? -getAmount0Delta(sqrtRatioAX96, sqrtRatioBX96, uint128(-liquidity), false).toInt256()
                 : getAmount0Delta(sqrtRatioAX96, sqrtRatioBX96, uint128(liquidity), true).toInt256();

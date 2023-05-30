@@ -31,6 +31,7 @@ library TickBitmap {
         self[wordPos] ^= mask;
     }
 
+    // 在一个work区间内返回下一个初始化的tick
     /// @notice Returns the next initialized tick contained in the same word (or adjacent word) as the tick that is either
     /// to the left (less than or equal to) or right (greater than) of the given tick
     /// @param self The mapping in which to compute the next initialized tick

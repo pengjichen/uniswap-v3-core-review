@@ -17,6 +17,7 @@ contract UniswapV3PoolDeployer is IUniswapV3PoolDeployer {
     /// @inheritdoc IUniswapV3PoolDeployer
     Parameters public override parameters;
 
+    // 使用create2的方式创建合约
     /// @dev Deploys a pool with the given parameters by transiently setting the parameters storage slot and then
     /// clearing it after deploying the pool.
     /// @param factory The contract address of the Uniswap V3 factory
@@ -32,6 +33,9 @@ contract UniswapV3PoolDeployer is IUniswapV3PoolDeployer {
         int24 tickSpacing
     ) internal returns (address pool) {
         parameters = Parameters({factory: factory, token0: token0, token1: token1, fee: fee, tickSpacing: tickSpacing});
+
+        // salt = hash(token0, token1, fee)
+        // parameters是全局storage变量, 在创建合约时的init步骤中会被使用, 合约创建完后, 就不再使用, 可以删掉, 同时防止对创建别的pair造成影响 
         pool = address(new UniswapV3Pool{salt: keccak256(abi.encode(token0, token1, fee))}());
         delete parameters;
     }
