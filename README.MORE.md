@@ -1,7 +1,11 @@
 # README MORE
 
+推荐了解顺序: AMM概念 --> V3白皮书(捎带了V2的设计方案) --> V3实现细节
 
 ## 学习资料
+
+###
+[AMM概念](https://academy.binance.com/zh/articles/what-is-an-automated-market-maker-amm)
 
 ### 官方白皮书
 [uniswap v2 白皮书 英文版](https://uniswap.org/whitepaper.pdf)
