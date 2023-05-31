@@ -6,6 +6,7 @@
 
 ###
 [AMM概念](https://academy.binance.com/zh/articles/what-is-an-automated-market-maker-amm)
+[AMM进化史 uniswap balancer Curve等](https://foresightnews.pro/article/detail/12956)
 
 ### 官方白皮书
 [uniswap v2 白皮书 英文版](https://uniswap.org/whitepaper.pdf)
